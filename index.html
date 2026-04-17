@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS4TheWould | PNG & JPG إلى DDS</title>
+  <title>PS4TheWould | PNG & JPG إلى DDS DXT5</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  
+  <!-- مكتبة UTEX.js للضغط DXT5 -->
+  <script src="https://raw.githubusercontent.com/photopea/UTEX.js/master/UTEX.js"></script>
+  <script src="https://raw.githubusercontent.com/photopea/UTEX.js/master/UTEX.DDS.js"></script>
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     body { font-family: 'Cairo', sans-serif; }
@@ -15,7 +20,6 @@
 </head>
 <body class="bg-[#0f172a] text-white min-h-screen">
 
-  <!-- Header مثل Convertio -->
   <header class="bg-white/5 border-b border-white/10 py-4">
     <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -23,20 +27,18 @@
         <h1 class="text-3xl font-bold">PS4TheWould</h1>
       </div>
       <div class="flex items-center gap-8 text-sm font-medium">
-        <a href="#" class="hover:text-[#00b0ff]">الرئيسية</a>
-        <a href="#" class="hover:text-[#00b0ff]">أدوات أخرى</a>
-        <span class="bg-[#00b0ff] text-black px-4 py-1 rounded-full text-xs font-bold">مجاني • بدون تسجيل</span>
+        <span class="bg-emerald-400 text-black px-4 py-1 rounded-full text-xs font-bold">DXT5 مضغوط • حجم صغير للألعاب</span>
       </div>
     </div>
   </header>
 
   <div class="max-w-4xl mx-auto px-6 py-16">
     <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold mb-3">تحويل PNG إلى DDS</h1>
-      <p class="text-xl text-slate-400">حوّل ملفات PNG و JPG إلى DDS بسرعة وسهولة</p>
+      <h1 class="text-5xl font-bold mb-3">تحويل PNG إلى DDS <span class="text-emerald-400">(DXT5)</span></h1>
+      <p class="text-xl text-slate-400">مثل Convertio • مضغوط DXT5 • حجم أصغر بكثير للألعاب</p>
     </div>
 
-    <!-- Upload Box - مطابق لـ Convertio -->
+    <!-- Upload Box -->
     <div id="uploadBox" onclick="document.getElementById('fileInput').click()"
          class="glass border-4 border-dashed border-[#00b0ff] rounded-3xl p-20 text-center cursor-pointer hover:border-[#00d0ff] transition-all">
       <i id="uploadIcon" class="fa-solid fa-cloud-upload-alt text-8xl text-[#00b0ff] mb-8"></i>
@@ -45,7 +47,7 @@
         <i class="fa-solid fa-folder-open"></i>
         اختر ملفات
       </button>
-      <p class="text-slate-400 mt-6">PNG • JPG • DDS • حتى 100 ميجا</p>
+      <p class="text-slate-400 mt-6">PNG • JPG • DDS DXT5 • حتى 100 ميجا</p>
       <input type="file" id="fileInput" accept="image/png,image/jpeg" class="hidden" onchange="handleFile(this.files[0])">
     </div>
 
@@ -58,19 +60,19 @@
           <p id="fileSize" class="text-slate-400 text-sm"></p>
         </div>
         <button onclick="startConversion()" 
-                class="bg-gradient-to-r from-[#00b0ff] to-[#00d0ff] text-black font-bold text-2xl px-14 py-6 rounded-2xl flex items-center gap-3 hover:scale-105 transition">
-          <i class="fa-solid fa-magic"></i>
-          <span>تحويل الآن</span>
+                class="bg-gradient-to-r from-[#00b0ff] to-emerald-400 text-black font-bold text-2xl px-14 py-6 rounded-2xl flex items-center gap-3 hover:scale-105 transition">
+          <i class="fa-solid fa-compress"></i>
+          <span>تحويل إلى DDS DXT5</span>
         </button>
       </div>
     </div>
 
-    <!-- Progress Bar -->
+    <!-- Progress -->
     <div id="progressSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
       <i class="fa-solid fa-spinner fa-spin text-6xl text-[#00b0ff] mb-6"></i>
-      <p class="text-2xl font-medium mb-8">جاري تحويل الملف إلى DDS...</p>
+      <p class="text-2xl font-medium mb-8">جاري الضغط DXT5...</p>
       <div class="w-full bg-slate-700 h-4 rounded-3xl overflow-hidden">
-        <div id="progressBar" class="h-4 bg-gradient-to-r from-[#00b0ff] to-cyan-400 rounded-3xl w-0 transition-all duration-300"></div>
+        <div id="progressBar" class="h-4 bg-gradient-to-r from-[#00b0ff] to-emerald-400 rounded-3xl w-0 transition-all duration-300"></div>
       </div>
       <p id="progressText" class="mt-4 text-slate-400 font-medium">0%</p>
     </div>
@@ -78,13 +80,13 @@
     <!-- Result -->
     <div id="resultSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
       <i class="fa-solid fa-circle-check text-8xl text-emerald-400 mb-6"></i>
-      <p class="text-3xl font-bold mb-1">تم التحويل بنجاح!</p>
+      <p class="text-3xl font-bold mb-1">تم التحويل بنجاح! (DXT5 مضغوط)</p>
       <p id="resultFileName" class="text-emerald-300 mb-10"></p>
       
       <button onclick="downloadFile()" 
               class="bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-bold text-2xl px-20 py-7 rounded-3xl flex items-center gap-4 mx-auto hover:scale-110 transition-all shadow-xl">
         <i class="fa-solid fa-download text-3xl"></i>
-        <span>تحميل الملف .dds</span>
+        <span>تحميل الملف .dds (DXT5)</span>
       </button>
 
       <button onclick="resetAll()" class="mt-12 flex items-center gap-3 mx-auto text-slate-400 hover:text-white">
@@ -96,7 +98,7 @@
 
   <footer class="text-center py-12 border-t border-white/10 text-slate-400 text-sm">
     <p class="mb-3 text-2xl font-light text-slate-300">بُني بعناية… ليمنحك تجربة بسيطة وسريعة</p>
-    © Ps4TheWould - All Rights Reserved • يعمل لجميع المستخدمين بدون قيود
+    © Ps4TheWould - All Rights Reserved • DXT5 مضغوط • يعمل لجميع المستخدمين
   </footer>
 
   <script>
@@ -118,43 +120,26 @@
     }
 
     async function imageToDDS(file) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = img.width; canvas.height = img.height;
+          canvas.width = img.width;
+          canvas.height = img.height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
 
-          const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-          const w = canvas.width, h = canvas.height;
-          const dds = new Uint8Array(128 + w * h * 4);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const rgba = new Uint8Array(imageData.data);           // RGBA8
+          const rgbaBuffer = rgba.buffer;
 
-          dds.set(new TextEncoder().encode('DDS '), 0);
-          const header = new DataView(dds.buffer, 4, 124);
-          header.setUint32(0, 124, true);
-          header.setUint32(4, 0x0000100F, true);
-          header.setUint32(8, h, true);
-          header.setUint32(12, w, true);
-          header.setUint32(16, w*4, true);
-          header.setUint32(24, 1, true);
-
-          const pf = new DataView(dds.buffer, 76, 32);
-          pf.setUint32(0, 32, true); pf.setUint32(4, 0x00000041, true);
-          pf.setUint32(12, 32, true);
-          pf.setUint32(16, 0x00ff0000, true);
-          pf.setUint32(20, 0x0000ff00, true);
-          pf.setUint32(24, 0x000000ff, true);
-          pf.setUint32(28, 0xff000000, true);
-
-          header.setUint32(104, 0x00001000, true);
-
-          const pixels = new Uint8Array(dds.buffer, 128);
-          for (let i = 0; i < data.length; i += 4) {
-            pixels[i] = data[i+2]; pixels[i+1] = data[i+1];
-            pixels[i+2] = data[i]; pixels[i+3] = data[i+3];
+          // استخدام UTEX.DDS.encode → DXT5 مضغوط + Mipmaps
+          try {
+            const ddsArrayBuffer = UTEX.DDS.encode(rgbaBuffer, canvas.width, canvas.height);
+            resolve(new Uint8Array(ddsArrayBuffer));
+          } catch (e) {
+            reject(e);
           }
-          resolve(dds);
         };
         img.src = URL.createObjectURL(file);
       });
@@ -166,24 +151,30 @@
 
       let progress = 0;
       const int = setInterval(() => {
-        progress += Math.random() * 30;
+        progress += Math.random() * 35;
         if (progress > 98) progress = 98;
         document.getElementById('progressBar').style.width = progress + '%';
         document.getElementById('progressText').textContent = Math.floor(progress) + '%';
-      }, 120);
+      }, 90);
 
-      const ddsArray = await imageToDDS(currentFile);
-      ddsBlob = new Blob([ddsArray], { type: 'application/octet-stream' });
+      try {
+        const ddsArray = await imageToDDS(currentFile);
+        ddsBlob = new Blob([ddsArray], { type: 'application/octet-stream' });
 
-      clearInterval(int);
-      document.getElementById('progressBar').style.width = '100%';
-      document.getElementById('progressText').textContent = '100%';
+        clearInterval(int);
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = '100%';
 
-      setTimeout(() => {
-        document.getElementById('progressSection').classList.add('hidden');
-        document.getElementById('resultSection').classList.remove('hidden');
-        document.getElementById('resultFileName').textContent = currentFile.name.replace(/\.\w+$/, '.dds');
-      }, 600);
+        setTimeout(() => {
+          document.getElementById('progressSection').classList.add('hidden');
+          document.getElementById('resultSection').classList.remove('hidden');
+          document.getElementById('resultFileName').textContent = currentFile.name.replace(/\.\w+$/, '.dds');
+        }, 500);
+      } catch (e) {
+        clearInterval(int);
+        alert('❌ خطأ في الضغط DXT5\n' + e.message + '\n\nجرب صورة أصغر أو أعد تحميل الصفحة');
+        resetAll();
+      }
     }
 
     function downloadFile() {
