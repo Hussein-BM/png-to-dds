@@ -4,13 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PS4TheWould | PNG & JPG إلى DDS DXT5</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  
-  <!-- مكتبة UTEX.js للضغط DXT5 -->
-  <script src="https://raw.githubusercontent.com/photopea/UTEX.js/master/UTEX.js"></script>
-  <script src="https://raw.githubusercontent.com/photopea/UTEX.js/master/UTEX.DDS.js"></script>
-  
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     body { font-family: 'Cairo', sans-serif; }
@@ -18,184 +15,112 @@
     .glass { background: rgba(15,23,42,0.95); backdrop-filter: blur(16px); }
   </style>
 </head>
+
 <body class="bg-[#0f172a] text-white min-h-screen">
 
-  <header class="bg-white/5 border-b border-white/10 py-4">
-    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-gamepad text-4xl convertio-blue"></i>
-        <h1 class="text-3xl font-bold">PS4TheWould</h1>
-      </div>
-      <div class="flex items-center gap-8 text-sm font-medium">
-        <span class="bg-emerald-400 text-black px-4 py-1 rounded-full text-xs font-bold">DXT5 مضغوط • حجم صغير للألعاب</span>
-      </div>
+<header class="bg-white/5 border-b border-white/10 py-4">
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-gamepad text-4xl convertio-blue"></i>
+      <h1 class="text-3xl font-bold">PS4TheWould</h1>
     </div>
-  </header>
+    <span class="bg-emerald-400 text-black px-4 py-1 rounded-full text-xs font-bold">
+      DXT5 مضغوط • حجم صغير للألعاب
+    </span>
+  </div>
+</header>
 
-  <div class="max-w-4xl mx-auto px-6 py-16">
-    <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold mb-3">تحويل PNG إلى DDS <span class="text-emerald-400">(DXT5)</span></h1>
-      <p class="text-xl text-slate-400">مثل Convertio • مضغوط DXT5 • حجم أصغر بكثير للألعاب</p>
-    </div>
+<div class="max-w-4xl mx-auto px-6 py-16">
 
-    <!-- Upload Box -->
-    <div id="uploadBox" onclick="document.getElementById('fileInput').click()"
-         class="glass border-4 border-dashed border-[#00b0ff] rounded-3xl p-20 text-center cursor-pointer hover:border-[#00d0ff] transition-all">
-      <i id="uploadIcon" class="fa-solid fa-cloud-upload-alt text-8xl text-[#00b0ff] mb-8"></i>
-      <p class="text-3xl font-semibold mb-2">اسحب الملفات هنا أو</p>
-      <button class="bg-[#00b0ff] hover:bg-[#00d0ff] text-black font-bold text-xl px-10 py-4 rounded-2xl inline-flex items-center gap-3">
-        <i class="fa-solid fa-folder-open"></i>
-        اختر ملفات
-      </button>
-      <p class="text-slate-400 mt-6">PNG • JPG • DDS DXT5 • حتى 100 ميجا</p>
-      <input type="file" id="fileInput" accept="image/png,image/jpeg" class="hidden" onchange="handleFile(this.files[0])">
-    </div>
-
-    <!-- File Ready -->
-    <div id="fileReady" class="hidden mt-8 glass rounded-3xl p-8">
-      <div class="flex items-center gap-6">
-        <img id="previewImg" class="w-28 h-28 object-contain rounded-2xl border border-slate-700" alt="">
-        <div class="flex-1 min-w-0">
-          <p id="fileNameDisplay" class="text-2xl font-medium truncate"></p>
-          <p id="fileSize" class="text-slate-400 text-sm"></p>
-        </div>
-        <button onclick="startConversion()" 
-                class="bg-gradient-to-r from-[#00b0ff] to-emerald-400 text-black font-bold text-2xl px-14 py-6 rounded-2xl flex items-center gap-3 hover:scale-105 transition">
-          <i class="fa-solid fa-compress"></i>
-          <span>تحويل إلى DDS DXT5</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Progress -->
-    <div id="progressSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
-      <i class="fa-solid fa-spinner fa-spin text-6xl text-[#00b0ff] mb-6"></i>
-      <p class="text-2xl font-medium mb-8">جاري الضغط DXT5...</p>
-      <div class="w-full bg-slate-700 h-4 rounded-3xl overflow-hidden">
-        <div id="progressBar" class="h-4 bg-gradient-to-r from-[#00b0ff] to-emerald-400 rounded-3xl w-0 transition-all duration-300"></div>
-      </div>
-      <p id="progressText" class="mt-4 text-slate-400 font-medium">0%</p>
-    </div>
-
-    <!-- Result -->
-    <div id="resultSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
-      <i class="fa-solid fa-circle-check text-8xl text-emerald-400 mb-6"></i>
-      <p class="text-3xl font-bold mb-1">تم التحويل بنجاح! (DXT5 مضغوط)</p>
-      <p id="resultFileName" class="text-emerald-300 mb-10"></p>
-      
-      <button onclick="downloadFile()" 
-              class="bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-bold text-2xl px-20 py-7 rounded-3xl flex items-center gap-4 mx-auto hover:scale-110 transition-all shadow-xl">
-        <i class="fa-solid fa-download text-3xl"></i>
-        <span>تحميل الملف .dds (DXT5)</span>
-      </button>
-
-      <button onclick="resetAll()" class="mt-12 flex items-center gap-3 mx-auto text-slate-400 hover:text-white">
-        <i class="fa-solid fa-rotate-right"></i>
-        تحويل ملف جديد
-      </button>
-    </div>
+  <div class="text-center mb-10">
+    <h1 class="text-5xl font-bold mb-3">
+      تحويل PNG إلى DDS <span class="text-emerald-400">(DXT5)</span>
+    </h1>
+    <p class="text-xl text-slate-400">تحويل حقيقي عبر السيرفر • ضغط عالي • حجم أصغر</p>
   </div>
 
-  <footer class="text-center py-12 border-t border-white/10 text-slate-400 text-sm">
-    <p class="mb-3 text-2xl font-light text-slate-300">بُني بعناية… ليمنحك تجربة بسيطة وسريعة</p>
-    © Ps4TheWould - All Rights Reserved • DXT5 مضغوط • يعمل لجميع المستخدمين
-  </footer>
+  <!-- Upload -->
+  <div id="uploadBox" onclick="fileInput.click()"
+       class="glass border-4 border-dashed border-[#00b0ff] rounded-3xl p-20 text-center cursor-pointer">
+    <i class="fa-solid fa-cloud-upload-alt text-8xl text-[#00b0ff] mb-8"></i>
+    <p class="text-3xl font-semibold">اختر صورة</p>
+    <input type="file" id="fileInput" class="hidden" onchange="handleFile(this.files[0])">
+  </div>
 
-  <script>
-    let currentFile = null;
-    let ddsBlob = null;
+  <!-- Preview -->
+  <div id="fileReady" class="hidden mt-8 glass rounded-3xl p-8 text-center">
+    <img id="previewImg" class="w-40 mx-auto mb-4 rounded-xl">
+    <p id="fileNameDisplay"></p>
 
-    function handleFile(file) {
-      if (!file) return;
-      currentFile = file;
-      document.getElementById('uploadBox').classList.add('hidden');
-      document.getElementById('fileReady').classList.remove('hidden');
+    <button onclick="startConversion()"
+      class="mt-6 bg-gradient-to-r from-[#00b0ff] to-emerald-400 text-black px-10 py-4 rounded-xl">
+      تحويل إلى DDS
+    </button>
+  </div>
 
-      document.getElementById('fileNameDisplay').textContent = file.name;
-      document.getElementById('fileSize').textContent = (file.size / (1024*1024)).toFixed(2) + ' MB';
+  <!-- Progress -->
+  <div id="progressSection" class="hidden mt-8 text-center">
+    <p>جاري التحويل...</p>
+  </div>
 
-      const reader = new FileReader();
-      reader.onload = e => document.getElementById('previewImg').src = e.target.result;
-      reader.readAsDataURL(file);
-    }
+  <!-- Result -->
+  <div id="resultSection" class="hidden mt-8 text-center">
+    <p>تم التحويل ✅</p>
+    <button onclick="downloadFile()" class="mt-4 bg-green-400 px-6 py-3 rounded">
+      تحميل DDS
+    </button>
+  </div>
 
-    async function imageToDDS(file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
+</div>
 
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const rgba = new Uint8Array(imageData.data);           // RGBA8
-          const rgbaBuffer = rgba.buffer;
+<script>
+let currentFile = null;
+let ddsBlob = null;
 
-          // استخدام UTEX.DDS.encode → DXT5 مضغوط + Mipmaps
-          try {
-            const ddsArrayBuffer = UTEX.DDS.encode(rgbaBuffer, canvas.width, canvas.height);
-            resolve(new Uint8Array(ddsArrayBuffer));
-          } catch (e) {
-            reject(e);
-          }
-        };
-        img.src = URL.createObjectURL(file);
-      });
-    }
+function handleFile(file) {
+  if (!file) return;
+  currentFile = file;
 
-    async function startConversion() {
-      document.getElementById('fileReady').classList.add('hidden');
-      document.getElementById('progressSection').classList.remove('hidden');
+  uploadBox.classList.add("hidden");
+  fileReady.classList.remove("hidden");
 
-      let progress = 0;
-      const int = setInterval(() => {
-        progress += Math.random() * 35;
-        if (progress > 98) progress = 98;
-        document.getElementById('progressBar').style.width = progress + '%';
-        document.getElementById('progressText').textContent = Math.floor(progress) + '%';
-      }, 90);
+  previewImg.src = URL.createObjectURL(file);
+  fileNameDisplay.textContent = file.name;
+}
 
-      try {
-        const ddsArray = await imageToDDS(currentFile);
-        ddsBlob = new Blob([ddsArray], { type: 'application/octet-stream' });
+async function startConversion() {
+  fileReady.classList.add("hidden");
+  progressSection.classList.remove("hidden");
 
-        clearInterval(int);
-        document.getElementById('progressBar').style.width = '100%';
-        document.getElementById('progressText').textContent = '100%';
+  try {
+    const formData = new FormData();
+    formData.append("image", currentFile);
+    formData.append("format", "DXT5");
 
-        setTimeout(() => {
-          document.getElementById('progressSection').classList.add('hidden');
-          document.getElementById('resultSection').classList.remove('hidden');
-          document.getElementById('resultFileName').textContent = currentFile.name.replace(/\.\w+$/, '.dds');
-        }, 500);
-      } catch (e) {
-        clearInterval(int);
-        alert('❌ خطأ في الضغط DXT5\n' + e.message + '\n\nجرب صورة أصغر أو أعد تحميل الصفحة');
-        resetAll();
-      }
-    }
+    const res = await fetch("https://your-server-url/convert", {
+      method: "POST",
+      body: formData
+    });
 
-    function downloadFile() {
-      if (!ddsBlob) return;
-      const url = URL.createObjectURL(ddsBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = currentFile.name.replace(/\.\w+$/, '.dds');
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    const blob = await res.blob();
+    ddsBlob = blob;
 
-    function resetAll() {
-      currentFile = ddsBlob = null;
-      document.getElementById('uploadBox').classList.remove('hidden');
-      document.getElementById('fileReady').classList.add('hidden');
-      document.getElementById('progressSection').classList.add('hidden');
-      document.getElementById('resultSection').classList.add('hidden');
-    }
+    progressSection.classList.add("hidden");
+    resultSection.classList.remove("hidden");
 
-    tailwind.config = { content: ["./**/*.{html,js}"] };
-  </script>
+  } catch (e) {
+    alert("❌ تأكد السيرفر شغال");
+  }
+}
+
+function downloadFile() {
+  const url = URL.createObjectURL(ddsBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = currentFile.name.replace(/\.\w+$/, ".dds");
+  a.click();
+}
+</script>
+
 </body>
 </html>
