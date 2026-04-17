@@ -3,206 +3,192 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>محول PS4TheWould | PNG & JPG إلى DDS</title>
+  <title>PS4TheWould | PNG & JPG إلى DDS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-    body { font-family: 'Cairo', system-ui, sans-serif; }
-    .neon { text-shadow: 0 0 15px #22d3ee; }
-    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
-    .drop-active { border-color: #22d3ee !important; background: rgba(34, 211, 238, 0.1) !important; }
+    body { font-family: 'Cairo', sans-serif; }
+    .convertio-blue { color: #00b0ff; }
+    .glass { background: rgba(15,23,42,0.95); backdrop-filter: blur(16px); }
   </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen">
+<body class="bg-[#0f172a] text-white min-h-screen">
 
-  <!-- Header -->
-  <header class="border-b border-cyan-500/30 bg-black/70 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+  <!-- Header مثل Convertio -->
+  <header class="bg-white/5 border-b border-white/10 py-4">
+    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <i class="fa-solid fa-gamepad text-4xl text-cyan-400"></i>
-        <h1 class="text-3xl font-bold neon">PS4TheWould</h1>
-        <span class="text-cyan-400 text-xl">محول DDS</span>
+        <i class="fa-solid fa-gamepad text-4xl convertio-blue"></i>
+        <h1 class="text-3xl font-bold">PS4TheWould</h1>
       </div>
-      <div class="text-sm text-zinc-400">تحويل PNG & JPG → DDS بسرعة البرق ⚡</div>
+      <div class="flex items-center gap-8 text-sm font-medium">
+        <a href="#" class="hover:text-[#00b0ff]">الرئيسية</a>
+        <a href="#" class="hover:text-[#00b0ff]">أدوات أخرى</a>
+        <span class="bg-[#00b0ff] text-black px-4 py-1 rounded-full text-xs font-bold">مجاني • بدون تسجيل</span>
+      </div>
     </div>
   </header>
 
-  <div class="max-w-4xl mx-auto px-6 py-12">
-    <div class="text-center mb-12">
-      <h2 class="text-5xl font-bold mb-4">حوّل صورك إلى DDS بسهولة</h2>
-      <p class="text-xl text-zinc-400">اسحب الصورة من أي مجلد أو اضغط للرفع</p>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold mb-3">تحويل PNG إلى DDS</h1>
+      <p class="text-xl text-slate-400">حوّل ملفات PNG و JPG إلى DDS بسرعة وسهولة</p>
     </div>
 
-    <!-- Upload Area مع Drag & Drop -->
-    <div id="uploadArea" 
-         class="glass border-2 border-dashed border-cyan-400/50 rounded-3xl p-16 text-center cursor-pointer hover:border-cyan-400 transition-all"
-         onclick="document.getElementById('fileInput').click()">
-      <i id="uploadIcon" class="fa-solid fa-cloud-upload-alt text-7xl text-cyan-400 mb-6"></i>
-      <p class="text-2xl font-semibold mb-2">اسحب الصورة هنا أو اضغط للرفع</p>
-      <p class="text-zinc-400">PNG • JPG (حتى 20 ميجا)</p>
+    <!-- Upload Box - مطابق لـ Convertio -->
+    <div id="uploadBox" onclick="document.getElementById('fileInput').click()"
+         class="glass border-4 border-dashed border-[#00b0ff] rounded-3xl p-20 text-center cursor-pointer hover:border-[#00d0ff] transition-all">
+      <i id="uploadIcon" class="fa-solid fa-cloud-upload-alt text-8xl text-[#00b0ff] mb-8"></i>
+      <p class="text-3xl font-semibold mb-2">اسحب الملفات هنا أو</p>
+      <button class="bg-[#00b0ff] hover:bg-[#00d0ff] text-black font-bold text-xl px-10 py-4 rounded-2xl inline-flex items-center gap-3">
+        <i class="fa-solid fa-folder-open"></i>
+        اختر ملفات
+      </button>
+      <p class="text-slate-400 mt-6">PNG • JPG • DDS • حتى 100 ميجا</p>
       <input type="file" id="fileInput" accept="image/png,image/jpeg" class="hidden" onchange="handleFile(this.files[0])">
     </div>
 
-    <!-- Preview & Convert -->
-    <div id="previewSection" class="hidden mt-12">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Original -->
-        <div>
-          <h3 class="text-cyan-400 mb-3 text-lg flex items-center gap-2"><i class="fa-solid fa-image"></i> الصورة الأصلية</h3>
-          <div class="glass rounded-3xl overflow-hidden border border-zinc-700">
-            <img id="originalImg" class="w-full max-h-96 object-contain mx-auto" alt="original">
-          </div>
+    <!-- File Ready -->
+    <div id="fileReady" class="hidden mt-8 glass rounded-3xl p-8">
+      <div class="flex items-center gap-6">
+        <img id="previewImg" class="w-28 h-28 object-contain rounded-2xl border border-slate-700" alt="">
+        <div class="flex-1 min-w-0">
+          <p id="fileNameDisplay" class="text-2xl font-medium truncate"></p>
+          <p id="fileSize" class="text-slate-400 text-sm"></p>
         </div>
-
-        <!-- Converted -->
-        <div>
-          <h3 class="text-cyan-400 mb-3 text-lg flex items-center gap-2"><i class="fa-solid fa-file-zipper"></i> بعد التحويل إلى DDS</h3>
-          <div class="glass rounded-3xl overflow-hidden border border-emerald-500/50 bg-emerald-900/10 p-8 text-center">
-            <i class="fa-solid fa-check-circle text-8xl text-emerald-400 mb-6"></i>
-            <p id="fileName" class="text-xl font-medium"></p>
-            <p class="text-emerald-300 text-sm mt-1">تم التحويل بنجاح • DDS حقيقي ومتوافق</p>
-            
-            <button onclick="downloadDDS()" 
-                    class="mt-10 bg-gradient-to-r from-cyan-400 to-emerald-400 text-black font-bold text-xl px-16 py-5 rounded-2xl flex items-center gap-4 mx-auto hover:scale-105 transition-all shadow-lg shadow-cyan-500/50">
-              <i class="fa-solid fa-download"></i>
-              <span>حفظ الملف .dds</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-10">
-        <button onclick="resetAll()" 
-                class="text-zinc-400 hover:text-white flex items-center gap-2 mx-auto">
-          <i class="fa-solid fa-rotate"></i> تحويل صورة جديدة
+        <button onclick="startConversion()" 
+                class="bg-gradient-to-r from-[#00b0ff] to-[#00d0ff] text-black font-bold text-2xl px-14 py-6 rounded-2xl flex items-center gap-3 hover:scale-105 transition">
+          <i class="fa-solid fa-magic"></i>
+          <span>تحويل الآن</span>
         </button>
       </div>
     </div>
+
+    <!-- Progress Bar -->
+    <div id="progressSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
+      <i class="fa-solid fa-spinner fa-spin text-6xl text-[#00b0ff] mb-6"></i>
+      <p class="text-2xl font-medium mb-8">جاري تحويل الملف إلى DDS...</p>
+      <div class="w-full bg-slate-700 h-4 rounded-3xl overflow-hidden">
+        <div id="progressBar" class="h-4 bg-gradient-to-r from-[#00b0ff] to-cyan-400 rounded-3xl w-0 transition-all duration-300"></div>
+      </div>
+      <p id="progressText" class="mt-4 text-slate-400 font-medium">0%</p>
+    </div>
+
+    <!-- Result -->
+    <div id="resultSection" class="hidden mt-8 glass rounded-3xl p-12 text-center">
+      <i class="fa-solid fa-circle-check text-8xl text-emerald-400 mb-6"></i>
+      <p class="text-3xl font-bold mb-1">تم التحويل بنجاح!</p>
+      <p id="resultFileName" class="text-emerald-300 mb-10"></p>
+      
+      <button onclick="downloadFile()" 
+              class="bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-bold text-2xl px-20 py-7 rounded-3xl flex items-center gap-4 mx-auto hover:scale-110 transition-all shadow-xl">
+        <i class="fa-solid fa-download text-3xl"></i>
+        <span>تحميل الملف .dds</span>
+      </button>
+
+      <button onclick="resetAll()" class="mt-12 flex items-center gap-3 mx-auto text-slate-400 hover:text-white">
+        <i class="fa-solid fa-rotate-right"></i>
+        تحويل ملف جديد
+      </button>
+    </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="bg-black/80 border-t border-zinc-800 py-10 mt-20">
-    <div class="max-w-6xl mx-auto px-6 text-center">
-      <p class="text-2xl font-light text-zinc-300 mb-4">
-        بُني بعناية… ليمنحك تجربة بسيطة وسريعة
-      </p>
-      <p class="text-zinc-500 text-sm">
-        © Ps4TheWould - All Rights Reserved<br>
-        جميع الحقوق محفوظة • يعمل لجميع المستخدمين بدون قيود
-      </p>
-    </div>
+  <footer class="text-center py-12 border-t border-white/10 text-slate-400 text-sm">
+    <p class="mb-3 text-2xl font-light text-slate-300">بُني بعناية… ليمنحك تجربة بسيطة وسريعة</p>
+    © Ps4TheWould - All Rights Reserved • يعمل لجميع المستخدمين بدون قيود
   </footer>
 
   <script>
     let currentFile = null;
-    let originalDataURL = null;
-
-    const uploadArea = document.getElementById('uploadArea');
-    const uploadIcon = document.getElementById('uploadIcon');
-
-    // === دعم السحب والإفلات ===
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('drop-active');
-      uploadIcon.classList.add('text-emerald-400');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('drop-active');
-      uploadIcon.classList.remove('text-emerald-400');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('drop-active');
-      uploadIcon.classList.remove('text-emerald-400');
-
-      const file = e.dataTransfer.files[0];
-      if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-        handleFile(file);
-      } else {
-        alert('❌ يرجى اختيار صورة PNG أو JPG فقط');
-      }
-    });
+    let ddsBlob = null;
 
     function handleFile(file) {
       if (!file) return;
       currentFile = file;
+      document.getElementById('uploadBox').classList.add('hidden');
+      document.getElementById('fileReady').classList.remove('hidden');
+
+      document.getElementById('fileNameDisplay').textContent = file.name;
+      document.getElementById('fileSize').textContent = (file.size / (1024*1024)).toFixed(2) + ' MB';
 
       const reader = new FileReader();
-      reader.onload = function(e) {
-        originalDataURL = e.target.result;
-        document.getElementById('originalImg').src = originalDataURL;
-        document.getElementById('fileName').textContent = file.name.replace(/\.\w+$/, '.dds');
-        document.getElementById('uploadArea').classList.add('hidden');
-        document.getElementById('previewSection').classList.remove('hidden');
-      };
+      reader.onload = e => document.getElementById('previewImg').src = e.target.result;
       reader.readAsDataURL(file);
     }
 
-    // باقي الكود (التحويل + التحميل) نفس السابق بدون تغيير
-    async function imageToDDS(imgFile) {
+    async function imageToDDS(file) {
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
+          canvas.width = img.width; canvas.height = img.height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
 
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const rgba = imageData.data;
-
-          const width = canvas.width;
-          const height = canvas.height;
-          const pitch = width * 4;
-
-          const ddsSize = 128 + (width * height * 4);
-          const dds = new Uint8Array(ddsSize);
+          const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+          const w = canvas.width, h = canvas.height;
+          const dds = new Uint8Array(128 + w * h * 4);
 
           dds.set(new TextEncoder().encode('DDS '), 0);
-
           const header = new DataView(dds.buffer, 4, 124);
           header.setUint32(0, 124, true);
           header.setUint32(4, 0x0000100F, true);
-          header.setUint32(8, height, true);
-          header.setUint32(12, width, true);
-          header.setUint32(16, pitch, true);
-          header.setUint32(20, 0, true);
+          header.setUint32(8, h, true);
+          header.setUint32(12, w, true);
+          header.setUint32(16, w*4, true);
           header.setUint32(24, 1, true);
 
-          const pf = new DataView(dds.buffer, 4 + 72, 32);
-          pf.setUint32(0, 32, true);
-          pf.setUint32(4, 0x00000041, true);
+          const pf = new DataView(dds.buffer, 76, 32);
+          pf.setUint32(0, 32, true); pf.setUint32(4, 0x00000041, true);
           pf.setUint32(12, 32, true);
           pf.setUint32(16, 0x00ff0000, true);
           pf.setUint32(20, 0x0000ff00, true);
           pf.setUint32(24, 0x000000ff, true);
           pf.setUint32(28, 0xff000000, true);
 
-          header.setUint32(100, 0x00001000, true);
+          header.setUint32(104, 0x00001000, true);
 
-          const pixelData = new Uint8Array(dds.buffer, 128);
-          for (let i = 0; i < rgba.length; i += 4) {
-            pixelData[i]     = rgba[i + 2];
-            pixelData[i + 1] = rgba[i + 1];
-            pixelData[i + 2] = rgba[i];
-            pixelData[i + 3] = rgba[i + 3];
+          const pixels = new Uint8Array(dds.buffer, 128);
+          for (let i = 0; i < data.length; i += 4) {
+            pixels[i] = data[i+2]; pixels[i+1] = data[i+1];
+            pixels[i+2] = data[i]; pixels[i+3] = data[i+3];
           }
-
           resolve(dds);
         };
-        img.src = URL.createObjectURL(imgFile);
+        img.src = URL.createObjectURL(file);
       });
     }
 
-    async function downloadDDS() {
-      if (!currentFile) return;
+    async function startConversion() {
+      document.getElementById('fileReady').classList.add('hidden');
+      document.getElementById('progressSection').classList.remove('hidden');
+
+      let progress = 0;
+      const int = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 98) progress = 98;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressText').textContent = Math.floor(progress) + '%';
+      }, 120);
+
       const ddsArray = await imageToDDS(currentFile);
-      const blob = new Blob([ddsArray], { type: 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
+      ddsBlob = new Blob([ddsArray], { type: 'application/octet-stream' });
+
+      clearInterval(int);
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = '100%';
+
+      setTimeout(() => {
+        document.getElementById('progressSection').classList.add('hidden');
+        document.getElementById('resultSection').classList.remove('hidden');
+        document.getElementById('resultFileName').textContent = currentFile.name.replace(/\.\w+$/, '.dds');
+      }, 600);
+    }
+
+    function downloadFile() {
+      if (!ddsBlob) return;
+      const url = URL.createObjectURL(ddsBlob);
       const a = document.createElement('a');
       a.href = url;
       a.download = currentFile.name.replace(/\.\w+$/, '.dds');
@@ -211,11 +197,11 @@
     }
 
     function resetAll() {
-      currentFile = null;
-      originalDataURL = null;
-      document.getElementById('uploadArea').classList.remove('hidden');
-      document.getElementById('previewSection').classList.add('hidden');
-      document.getElementById('fileInput').value = '';
+      currentFile = ddsBlob = null;
+      document.getElementById('uploadBox').classList.remove('hidden');
+      document.getElementById('fileReady').classList.add('hidden');
+      document.getElementById('progressSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
     }
 
     tailwind.config = { content: ["./**/*.{html,js}"] };
