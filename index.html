@@ -11,6 +11,7 @@
     body { font-family: 'Cairo', system-ui, sans-serif; }
     .neon { text-shadow: 0 0 15px #22d3ee; }
     .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+    .drop-active { border-color: #22d3ee !important; background: rgba(34, 211, 238, 0.1) !important; }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
@@ -30,14 +31,14 @@
   <div class="max-w-4xl mx-auto px-6 py-12">
     <div class="text-center mb-12">
       <h2 class="text-5xl font-bold mb-4">حوّل صورك إلى DDS بسهولة</h2>
-      <p class="text-xl text-zinc-400">واجهة مميزة • تحويل فوري • DDS حقيقي • يعمل بدون تسجيل</p>
+      <p class="text-xl text-zinc-400">اسحب الصورة من أي مجلد أو اضغط للرفع</p>
     </div>
 
-    <!-- Upload Area -->
+    <!-- Upload Area مع Drag & Drop -->
     <div id="uploadArea" 
          class="glass border-2 border-dashed border-cyan-400/50 rounded-3xl p-16 text-center cursor-pointer hover:border-cyan-400 transition-all"
          onclick="document.getElementById('fileInput').click()">
-      <i class="fa-solid fa-cloud-upload-alt text-7xl text-cyan-400 mb-6"></i>
+      <i id="uploadIcon" class="fa-solid fa-cloud-upload-alt text-7xl text-cyan-400 mb-6"></i>
       <p class="text-2xl font-semibold mb-2">اسحب الصورة هنا أو اضغط للرفع</p>
       <p class="text-zinc-400">PNG • JPG (حتى 20 ميجا)</p>
       <input type="file" id="fileInput" accept="image/png,image/jpeg" class="hidden" onchange="handleFile(this.files[0])">
@@ -60,7 +61,7 @@
           <div class="glass rounded-3xl overflow-hidden border border-emerald-500/50 bg-emerald-900/10 p-8 text-center">
             <i class="fa-solid fa-check-circle text-8xl text-emerald-400 mb-6"></i>
             <p id="fileName" class="text-xl font-medium"></p>
-            <p class="text-emerald-300 text-sm mt-1">تم التحويل بنجاح • DDS غير مضغوط (حقيقي ومتوافق)</p>
+            <p class="text-emerald-300 text-sm mt-1">تم التحويل بنجاح • DDS حقيقي ومتوافق</p>
             
             <button onclick="downloadDDS()" 
                     class="mt-10 bg-gradient-to-r from-cyan-400 to-emerald-400 text-black font-bold text-xl px-16 py-5 rounded-2xl flex items-center gap-4 mx-auto hover:scale-105 transition-all shadow-lg shadow-cyan-500/50">
@@ -97,11 +98,38 @@
     let currentFile = null;
     let originalDataURL = null;
 
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadIcon = document.getElementById('uploadIcon');
+
+    // === دعم السحب والإفلات ===
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('drop-active');
+      uploadIcon.classList.add('text-emerald-400');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('drop-active');
+      uploadIcon.classList.remove('text-emerald-400');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('drop-active');
+      uploadIcon.classList.remove('text-emerald-400');
+
+      const file = e.dataTransfer.files[0];
+      if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+        handleFile(file);
+      } else {
+        alert('❌ يرجى اختيار صورة PNG أو JPG فقط');
+      }
+    });
+
     function handleFile(file) {
       if (!file) return;
       currentFile = file;
 
-      // Preview
       const reader = new FileReader();
       reader.onload = function(e) {
         originalDataURL = e.target.result;
@@ -113,7 +141,7 @@
       reader.readAsDataURL(file);
     }
 
-    // ============ تحويل حقيقي إلى DDS (غير مضغوط) ============
+    // باقي الكود (التحويل + التحميل) نفس السابق بدون تغيير
     async function imageToDDS(imgFile) {
       return new Promise((resolve) => {
         const img = new Image();
@@ -125,50 +153,43 @@
           ctx.drawImage(img, 0, 0);
 
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const rgba = imageData.data; // RGBA
+          const rgba = imageData.data;
 
           const width = canvas.width;
           const height = canvas.height;
           const pitch = width * 4;
 
-          // إنشاء الملف DDS كاملاً (128 بايت هيدر + بيانات)
           const ddsSize = 128 + (width * height * 4);
           const dds = new Uint8Array(ddsSize);
 
-          // Magic "DDS "
           dds.set(new TextEncoder().encode('DDS '), 0);
 
-          // Header (124 bytes)
           const header = new DataView(dds.buffer, 4, 124);
+          header.setUint32(0, 124, true);
+          header.setUint32(4, 0x0000100F, true);
+          header.setUint32(8, height, true);
+          header.setUint32(12, width, true);
+          header.setUint32(16, pitch, true);
+          header.setUint32(20, 0, true);
+          header.setUint32(24, 1, true);
 
-          header.setUint32(0, 124, true);                    // dwSize
-          header.setUint32(4, 0x0000100F, true);             // dwFlags (CAPS + HEIGHT + WIDTH + PITCH + PIXELFORMAT)
-          header.setUint32(8, height, true);                 // dwHeight
-          header.setUint32(12, width, true);                 // dwWidth
-          header.setUint32(16, pitch, true);                 // dwPitchOrLinearSize
-          header.setUint32(20, 0, true);                     // dwDepth
-          header.setUint32(24, 1, true);                     // dwMipMapCount
-
-          // Pixel Format (offset 72 في الـheader)
           const pf = new DataView(dds.buffer, 4 + 72, 32);
-          pf.setUint32(0, 32, true);                         // dwSize
-          pf.setUint32(4, 0x00000041, true);                 // dwFlags = DDPF_ALPHAPIXELS | DDPF_RGB
-          pf.setUint32(12, 32, true);                        // dwRGBBitCount
-          pf.setUint32(16, 0x00ff0000, true);                // dwRBitMask (Red)
-          pf.setUint32(20, 0x0000ff00, true);                // dwGBitMask (Green)
-          pf.setUint32(24, 0x000000ff, true);                // dwBBitMask (Blue)
-          pf.setUint32(28, 0xff000000, true);                // dwRGBAlphaBitMask
+          pf.setUint32(0, 32, true);
+          pf.setUint32(4, 0x00000041, true);
+          pf.setUint32(12, 32, true);
+          pf.setUint32(16, 0x00ff0000, true);
+          pf.setUint32(20, 0x0000ff00, true);
+          pf.setUint32(24, 0x000000ff, true);
+          pf.setUint32(28, 0xff000000, true);
 
-          // dwCaps
-          header.setUint32(104 - 4, 0x00001000, true);       // DDSCAPS_TEXTURE
+          header.setUint32(100, 0x00001000, true);
 
-          // البيانات: تحويل RGBA → BGRA
           const pixelData = new Uint8Array(dds.buffer, 128);
           for (let i = 0; i < rgba.length; i += 4) {
-            pixelData[i]     = rgba[i + 2];   // B
-            pixelData[i + 1] = rgba[i + 1];   // G
-            pixelData[i + 2] = rgba[i];       // R
-            pixelData[i + 3] = rgba[i + 3];   // A
+            pixelData[i]     = rgba[i + 2];
+            pixelData[i + 1] = rgba[i + 1];
+            pixelData[i + 2] = rgba[i];
+            pixelData[i + 3] = rgba[i + 3];
           }
 
           resolve(dds);
@@ -180,15 +201,12 @@
     async function downloadDDS() {
       if (!currentFile) return;
       const ddsArray = await imageToDDS(currentFile);
-      
       const blob = new Blob([ddsArray], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
-      
       const a = document.createElement('a');
       a.href = url;
       a.download = currentFile.name.replace(/\.\w+$/, '.dds');
       a.click();
-      
       URL.revokeObjectURL(url);
     }
 
@@ -200,11 +218,7 @@
       document.getElementById('fileInput').value = '';
     }
 
-    // Tailwind script
-    tailwind.config = {
-      content: ["./**/*.{html,js}"],
-      theme: { extend: {} }
-    };
+    tailwind.config = { content: ["./**/*.{html,js}"] };
   </script>
 </body>
 </html>
