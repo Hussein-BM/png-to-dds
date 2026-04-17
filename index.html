@@ -1,30 +1,210 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>PNG to DDS | PS4 THE WOULD</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محول PS4TheWould | PNG & JPG إلى DDS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    body { font-family: 'Cairo', system-ui, sans-serif; }
+    .neon { text-shadow: 0 0 15px #22d3ee; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+  </style>
 </head>
+<body class="bg-zinc-950 text-white min-h-screen">
 
-<body>
+  <!-- Header -->
+  <header class="border-b border-cyan-500/30 bg-black/70 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-gamepad text-4xl text-cyan-400"></i>
+        <h1 class="text-3xl font-bold neon">PS4TheWould</h1>
+        <span class="text-cyan-400 text-xl">محول DDS</span>
+      </div>
+      <div class="text-sm text-zinc-400">تحويل PNG & JPG → DDS بسرعة البرق ⚡</div>
+    </div>
+  </header>
 
-<div class="container">
-  <h1>🔥 PNG/JPG → DDS</h1>
+  <div class="max-w-4xl mx-auto px-6 py-12">
+    <div class="text-center mb-12">
+      <h2 class="text-5xl font-bold mb-4">حوّل صورك إلى DDS بسهولة</h2>
+      <p class="text-xl text-zinc-400">واجهة مميزة • تحويل فوري • DDS حقيقي • يعمل بدون تسجيل</p>
+    </div>
 
-  <div class="drop-zone" id="dropZone">
-    اسحب الصورة هنا أو اضغط
+    <!-- Upload Area -->
+    <div id="uploadArea" 
+         class="glass border-2 border-dashed border-cyan-400/50 rounded-3xl p-16 text-center cursor-pointer hover:border-cyan-400 transition-all"
+         onclick="document.getElementById('fileInput').click()">
+      <i class="fa-solid fa-cloud-upload-alt text-7xl text-cyan-400 mb-6"></i>
+      <p class="text-2xl font-semibold mb-2">اسحب الصورة هنا أو اضغط للرفع</p>
+      <p class="text-zinc-400">PNG • JPG (حتى 20 ميجا)</p>
+      <input type="file" id="fileInput" accept="image/png,image/jpeg" class="hidden" onchange="handleFile(this.files[0])">
+    </div>
+
+    <!-- Preview & Convert -->
+    <div id="previewSection" class="hidden mt-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Original -->
+        <div>
+          <h3 class="text-cyan-400 mb-3 text-lg flex items-center gap-2"><i class="fa-solid fa-image"></i> الصورة الأصلية</h3>
+          <div class="glass rounded-3xl overflow-hidden border border-zinc-700">
+            <img id="originalImg" class="w-full max-h-96 object-contain mx-auto" alt="original">
+          </div>
+        </div>
+
+        <!-- Converted -->
+        <div>
+          <h3 class="text-cyan-400 mb-3 text-lg flex items-center gap-2"><i class="fa-solid fa-file-zipper"></i> بعد التحويل إلى DDS</h3>
+          <div class="glass rounded-3xl overflow-hidden border border-emerald-500/50 bg-emerald-900/10 p-8 text-center">
+            <i class="fa-solid fa-check-circle text-8xl text-emerald-400 mb-6"></i>
+            <p id="fileName" class="text-xl font-medium"></p>
+            <p class="text-emerald-300 text-sm mt-1">تم التحويل بنجاح • DDS غير مضغوط (حقيقي ومتوافق)</p>
+            
+            <button onclick="downloadDDS()" 
+                    class="mt-10 bg-gradient-to-r from-cyan-400 to-emerald-400 text-black font-bold text-xl px-16 py-5 rounded-2xl flex items-center gap-4 mx-auto hover:scale-105 transition-all shadow-lg shadow-cyan-500/50">
+              <i class="fa-solid fa-download"></i>
+              <span>حفظ الملف .dds</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-10">
+        <button onclick="resetAll()" 
+                class="text-zinc-400 hover:text-white flex items-center gap-2 mx-auto">
+          <i class="fa-solid fa-rotate"></i> تحويل صورة جديدة
+        </button>
+      </div>
+    </div>
   </div>
 
-  <p id="fileName"></p>
+  <!-- Footer -->
+  <footer class="bg-black/80 border-t border-zinc-800 py-10 mt-20">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="text-2xl font-light text-zinc-300 mb-4">
+        بُني بعناية… ليمنحك تجربة بسيطة وسريعة
+      </p>
+      <p class="text-zinc-500 text-sm">
+        © Ps4TheWould - All Rights Reserved<br>
+        جميع الحقوق محفوظة • يعمل لجميع المستخدمين بدون قيود
+      </p>
+    </div>
+  </footer>
 
-  <button onclick="fakeConvert()">تحويل</button>
-</div>
+  <script>
+    let currentFile = null;
+    let originalDataURL = null;
 
-<footer>
-  © 2026 PS4 THE WOULD - جميع الحقوق محفوظة
-</footer>
+    function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
 
-<script src="script.js"></script>
+      // Preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        originalDataURL = e.target.result;
+        document.getElementById('originalImg').src = originalDataURL;
+        document.getElementById('fileName').textContent = file.name.replace(/\.\w+$/, '.dds');
+        document.getElementById('uploadArea').classList.add('hidden');
+        document.getElementById('previewSection').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
 
+    // ============ تحويل حقيقي إلى DDS (غير مضغوط) ============
+    async function imageToDDS(imgFile) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const rgba = imageData.data; // RGBA
+
+          const width = canvas.width;
+          const height = canvas.height;
+          const pitch = width * 4;
+
+          // إنشاء الملف DDS كاملاً (128 بايت هيدر + بيانات)
+          const ddsSize = 128 + (width * height * 4);
+          const dds = new Uint8Array(ddsSize);
+
+          // Magic "DDS "
+          dds.set(new TextEncoder().encode('DDS '), 0);
+
+          // Header (124 bytes)
+          const header = new DataView(dds.buffer, 4, 124);
+
+          header.setUint32(0, 124, true);                    // dwSize
+          header.setUint32(4, 0x0000100F, true);             // dwFlags (CAPS + HEIGHT + WIDTH + PITCH + PIXELFORMAT)
+          header.setUint32(8, height, true);                 // dwHeight
+          header.setUint32(12, width, true);                 // dwWidth
+          header.setUint32(16, pitch, true);                 // dwPitchOrLinearSize
+          header.setUint32(20, 0, true);                     // dwDepth
+          header.setUint32(24, 1, true);                     // dwMipMapCount
+
+          // Pixel Format (offset 72 في الـheader)
+          const pf = new DataView(dds.buffer, 4 + 72, 32);
+          pf.setUint32(0, 32, true);                         // dwSize
+          pf.setUint32(4, 0x00000041, true);                 // dwFlags = DDPF_ALPHAPIXELS | DDPF_RGB
+          pf.setUint32(12, 32, true);                        // dwRGBBitCount
+          pf.setUint32(16, 0x00ff0000, true);                // dwRBitMask (Red)
+          pf.setUint32(20, 0x0000ff00, true);                // dwGBitMask (Green)
+          pf.setUint32(24, 0x000000ff, true);                // dwBBitMask (Blue)
+          pf.setUint32(28, 0xff000000, true);                // dwRGBAlphaBitMask
+
+          // dwCaps
+          header.setUint32(104 - 4, 0x00001000, true);       // DDSCAPS_TEXTURE
+
+          // البيانات: تحويل RGBA → BGRA
+          const pixelData = new Uint8Array(dds.buffer, 128);
+          for (let i = 0; i < rgba.length; i += 4) {
+            pixelData[i]     = rgba[i + 2];   // B
+            pixelData[i + 1] = rgba[i + 1];   // G
+            pixelData[i + 2] = rgba[i];       // R
+            pixelData[i + 3] = rgba[i + 3];   // A
+          }
+
+          resolve(dds);
+        };
+        img.src = URL.createObjectURL(imgFile);
+      });
+    }
+
+    async function downloadDDS() {
+      if (!currentFile) return;
+      const ddsArray = await imageToDDS(currentFile);
+      
+      const blob = new Blob([ddsArray], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = currentFile.name.replace(/\.\w+$/, '.dds');
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+
+    function resetAll() {
+      currentFile = null;
+      originalDataURL = null;
+      document.getElementById('uploadArea').classList.remove('hidden');
+      document.getElementById('previewSection').classList.add('hidden');
+      document.getElementById('fileInput').value = '';
+    }
+
+    // Tailwind script
+    tailwind.config = {
+      content: ["./**/*.{html,js}"],
+      theme: { extend: {} }
+    };
+  </script>
 </body>
 </html>
