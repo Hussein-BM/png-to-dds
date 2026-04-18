@@ -97,10 +97,10 @@ async function startConversion() {
     formData.append("image", currentFile);
     formData.append("format", "DXT5");
 
-    const res = await fetch("https://dds-server-1.onrender.com/convert", {
-      method: "POST",
-      body: formData
-    });
+    const res = await fetch("https://dds-server-r7gu.onrender.com/convert", {
+  method: "POST",
+  body: formData
+});
 
     const blob = await res.blob();
     ddsBlob = blob;
